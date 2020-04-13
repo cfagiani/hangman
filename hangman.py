@@ -14,6 +14,11 @@ SECRET_WORDS = ["spaceship", "bananas", "architect", "hockey", "picture", "liter
 
 
 def main():
+    """
+    This runs the main logic of the program. It should display the game window and then ask the user to make a guess.
+
+    :return:
+    """
     win = GraphWin("Hangman", WIN_HEIGHT, WIN_WIDTH)
     win.setBackground("white")
     used_letters = []
@@ -34,7 +39,7 @@ def main():
         if len(matching_positions) == 0:
             incorrect_count += 1
         current_word = update_current_word(current_word, matching_positions, guess)
-        time.sleep(.1)
+        time.sleep(.05)
     draw_word(current_word, win)
     draw_used(used_letters, win)
     show_result(is_winner(current_word), win)
@@ -43,10 +48,20 @@ def main():
 
 
 def get_secret_word():
+    """
+    This method returns the secret word that will be used for the game. It takes no inputs and returns a single word.
+    :return:
+    """
     return random.choice(SECRET_WORDS)
 
 
 def show_result(did_win, window):
+    """
+    This method displays the game result text based on whether the user won or not.
+    :param did_win: a boolean value indicating if the user won (True) or not (False)
+    :param window: window that should be updated
+    :return:
+    """
     text = "YOU WIN"
     if not did_win:
         text = "YOU LOSE"
@@ -58,6 +73,14 @@ def show_result(did_win, window):
 
 
 def update_current_word(current_word, positions, guess):
+    """
+    This method updates the "current_word" by replacing the blanks at each of the positions indicated in the positions
+    array with the guess.
+    :param current_word: string representation of the word with blanks for each un-guessed letter
+    :param positions: list of indexes within current_word that should be replaced
+    :param guess: letter that was guessed by the user
+    :return:
+    """
     char_list = list(current_word)
     for pos in positions:
         char_list[pos] = guess
@@ -65,6 +88,14 @@ def update_current_word(current_word, positions, guess):
 
 
 def get_indexes(guess, secret_word):
+    """
+    This method returns an array of indexes within the secret_word that match the guess. For example, if the word was
+    'tomato' and guess is 't', the return value would be [0,4]. If the secret word was 'tomato' and the guess was 'z',
+    the return value would be [] (an empty list).
+    :param guess:
+    :param secret_word:
+    :return:
+    """
     indexes = []
     for i in range(len(secret_word)):
         if guess == secret_word[i]:
@@ -89,6 +120,11 @@ def is_valid_guess(guess, used_letters):
 
 
 def is_letter(character):
+    """
+    This method returns True if the character passed in is a lowercase letter.
+    :param character:
+    :return:
+    """
     code = ord(character)
     return 97 <= code <= 122
 
@@ -121,6 +157,7 @@ def draw_hangman(incorrect_guesses, window):
          Point(hangman_center_x, gallows_top)).draw(window)
     Line(Point(hangman_center_x, gallows_top),
          Point(hangman_center_x, rope_bottom)).draw(window)
+    # draw the man based on how many wrong guesses there are
     if incorrect_guesses > 0:
         Circle(Point(hangman_center_x, rope_bottom + head_radius), head_radius).draw(window)
     if incorrect_guesses > 1:
@@ -147,6 +184,13 @@ def draw_hangman(incorrect_guesses, window):
 
 
 def draw_word(current_word, window):
+    """
+    This method draws the 'current_word' to show the user's progress in guessing it. The word is drawn along the bottom
+    of the game window.
+    :param current_word:
+    :param window:
+    :return:
+    """
     total_width = len(current_word) * BLANK_WIDTH + (len(current_word) - 1) * PADDING
     cur_x = (WIN_WIDTH - total_width) / 2
     for val in current_word:
@@ -157,6 +201,12 @@ def draw_word(current_word, window):
 
 
 def prompt_for_guess(window):
+    """
+    This method draws the prompt asking the user to enter a guess and then waits for the user to press a key. It returns
+    a string that represents the key pressed.
+    :param window:
+    :return:
+    """
     guess_y = WIN_HEIGHT - WIN_HEIGHT / 5
     t = Text(Point(PADDING * 7, guess_y), "Enter a guess")
     t.setSize(24)
@@ -165,6 +215,13 @@ def prompt_for_guess(window):
 
 
 def draw_used(used_letters, window):
+    """
+    This method draws the set of letters that the user has guessed. This is drawn under the current word at the bottom
+    of the game window.
+    :param used_letters: array of letter that have been guessed
+    :param window:
+    :return:
+    """
     t = Text(Point(PADDING * 3, WIN_HEIGHT - WIN_HEIGHT / 7), "Used:")
     t.setSize(24)
     t.draw(window)
@@ -177,10 +234,20 @@ def draw_used(used_letters, window):
 
 
 def is_dead(incorrect_count):
+    """
+    This method returns True if the play has lost (too many wrong guesses). Otherwise, it returns False.
+    :param incorrect_count:
+    :return:
+    """
     return incorrect_count >= NUM_GUESSES
 
 
 def is_winner(current_word):
+    """
+    This method returns True if the user won (found all letters in the secret word), otherwise it returns False.
+    :param current_word:
+    :return:
+    """
     return "_" not in current_word
 
 
