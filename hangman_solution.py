@@ -1,3 +1,5 @@
+import random
+
 from graphics import *
 
 WIN_HEIGHT = 900
@@ -7,29 +9,9 @@ PADDING = 10
 
 NUM_GUESSES = 8
 
+SECRET_WORDS = ["spaceship", "bananas", "architect", "hockey", "picture", "literature", "library", "automobile",
+                "airplane", "bumblebee", "dictionary", "xylophone", "piano", "potato", "broccoli", "weather"]
 
-# TODO 0: Here are some terms that may help you understand:
-# - character = a single letter or number (for instance 'a' or '9')
-
-# - string = a series of characters. You represent this by enclosing it in quotes (for instance "this is a string")
-
-# - boolean = a value that is either True or False
-
-# - variable = a variable is just a name you give a value (like a number or a string). You can do a bunch of things with
-# a variable like read it, assign to it (give it a value), and pass it to a function.
-
-# - assignment = setting a variable equal to something
-
-# - array = a list of multiple values of the same type. When you have a list, you can access individual members of the
-# list using the "membership operator" which is written with square brackets []. For example, to access the first entry
-# in a list called my_list, you'd write my_list[0].  The number inside the brackets is called the "index" of the array.
-# in Python (and many other programming languages) list indexes start at 0, not 1.
-
-# - function = a re-usable piece of code that can take inputs and may produce outputs. Functions have names and can be
-# called by using its name followed by parenthesis. For instance this_is_a_function_call()
-# To pass values to a function, include them inside the parenthesis. If a function returns values, you can use that
-# to assign a variable. For instance: my_var = my_func(my_arg) will pass a variable called my_arg to a function called
-# my_func and set the my_var variable to the value that is returned by the function.
 
 def main():
     """
@@ -39,75 +21,26 @@ def main():
     """
     win = GraphWin("Hangman", WIN_HEIGHT, WIN_WIDTH)
     win.setBackground("white")
-    # this array is used for keeping track of the letters that have already been guessed
     used_letters = []
-    # secret_word is the word the user is going to have to guess
     secret_word = get_secret_word()
-
-    # current_word is used to show blanks for any letters that have not been guessed yet.
-    # a the beginning of the game, it is all blanks. By the end, it'll match secret_word (if the user won)
     current_word = "_" * len(secret_word)
-
-    # incorrect_count is used to keep track of how many wrong answers the user has given.
     incorrect_count = 0
     while not is_winner(current_word) and not is_dead(incorrect_count):
         draw_hangman(incorrect_count, win)
         draw_word(current_word, win)
         draw_used(used_letters, win)
-
-        # TODO 1: define a "variable" to hold the user's guess. Use the get_guess function to ask the user to guess a letter
-        # call this variable "guess"
-
-        # TODO 2: update the "used_letters" array with the guess so the user knows not to guess it again
-
-        # TODO 3: use the "get_indexes" function to get a list of the positions within the secret_word that match the guess
-        # store this in a new variable called "matching_positions"
-
-        # TODO 4: check if the user was right or not. To do this, check how many entries are in the "matching_positions"
-        # array. If there are none, then we know they were wrong. To do this, you can use the "len" function.
-        # that function returns the "length" of the array. If the user is wrong, add 1 to incorrect_count
-
-        # TODO 5: update the current_word variable by calling the update_current_word function and assigning the result
-        # back to the current_word array. This will replace any blanks with the guess if it is correct.
-        # look a the documentation for the update_current_word function and make sure you pass it the right parameters
-
+        guess = get_guess(win, used_letters)
+        used_letters += guess
+        matching_positions = get_indexes(guess, secret_word)
+        if len(matching_positions) == 0:
+            incorrect_count += 1
+        current_word = update_current_word(current_word, matching_positions, guess)
         time.sleep(.05)
     draw_word(current_word, win)
     draw_used(used_letters, win)
     show_result(is_winner(current_word), win)
     win.getKey()  # wait for key
     win.close()  # Close window when done
-
-
-def get_secret_word():
-    """
-    This method returns the secret word that will be used for the game. It takes no inputs and returns a single word.
-    :return:
-    """
-    # TODO 6: replace this code with code that can return a secret word to use for this game. To make the game more fun,
-    # you probably want to make it 'random' so that each time you play the game, a different word is used.
-    # to do this, you can use random.choice(XXXX) where XXXX is an array of words that can be used.
-    return "test"
-
-
-def is_dead(incorrect_count):
-    """
-    This method returns True if the play has lost (too many wrong guesses). Otherwise, it returns False.
-    :param incorrect_count:
-    :return:
-    """
-    # TODO 7: replace the body of this function with code that can determine if the player is dead or not
-    return False
-
-
-def is_winner(current_word):
-    """
-    This method returns True if the user won (found all letters in the secret word), otherwise it returns False.
-    :param current_word:
-    :return:
-    """
-    # TODO 8: replace the body of this function with code that can determine if the player has won or not
-    return False
 
 
 def get_guess(window, used_letters):
@@ -122,6 +55,14 @@ def get_guess(window, used_letters):
     while not is_valid_guess(guess, used_letters):
         guess = prompt_for_guess(window)
     return guess.strip().lower()
+
+
+def get_secret_word():
+    """
+    This method returns the secret word that will be used for the game. It takes no inputs and returns a single word.
+    :return:
+    """
+    return random.choice(SECRET_WORDS)
 
 
 def show_result(did_win, window):
@@ -300,6 +241,24 @@ def draw_used(used_letters, window):
         t.setSize(20)
         t.draw(window)
         cur_x += BLANK_WIDTH + PADDING
+
+
+def is_dead(incorrect_count):
+    """
+    This method returns True if the play has lost (too many wrong guesses). Otherwise, it returns False.
+    :param incorrect_count:
+    :return:
+    """
+    return incorrect_count >= NUM_GUESSES
+
+
+def is_winner(current_word):
+    """
+    This method returns True if the user won (found all letters in the secret word), otherwise it returns False.
+    :param current_word:
+    :return:
+    """
+    return "_" not in current_word
 
 
 # Code that is not enclosed in a function is run when this file is run via the command line or when it is imported
